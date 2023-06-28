@@ -29,6 +29,7 @@
 #include <linux/types.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/sysmacros.h>
 #include <fcntl.h>
 #include <unistd.h>
 #include <err.h>
@@ -50,13 +51,13 @@
 #endif
 
 /* serial port of the modem */
-#define SERIAL_PORT	"/dev/ttyS1"
+#define SERIAL_PORT	"/dev/ttyS0"
 
 /* line speed */
 #define LINE_SPEED	B115200
 
 /* maximum transfert unit (MTU), value in bytes */
-#define MTU	512
+#define MTU	1400
 
 /**
 * whether or not to create virtual TTYs for the multiplex
@@ -66,7 +67,7 @@
 #define CREATE_NODES	1
 
 /* number of virtual TTYs to create (most modems can handle up to 4) */
-#define NUM_NODES	4
+#define NUM_NODES	2
 
 /* name of the virtual TTYs to create */
 #define BASENAME_NODES	"/dev/ttyGSM"
@@ -313,15 +314,16 @@ int main(void) {
 	*	to fit your modem needs.
 	*	The following matches Quectel M95.
 	*/
-	if (send_at_command(serial_fd, "AT+IFC=2,2\r") == -1)
-		errx(EXIT_FAILURE, "AT+IFC=2,2: bad response");	
-	if (send_at_command(serial_fd, "AT+GMM\r") == -1)
-		warnx("AT+GMM: bad response");
+	// if (send_at_command(serial_fd, "AT+IFC=2,2\r") == -1)
+	// 	errx(EXIT_FAILURE, "AT+IFC=2,2: bad response");	
+	// if (send_at_command(serial_fd, "AT+GMM\r") == -1)
+	// 	warnx("AT+GMM: bad response");
 	if (send_at_command(serial_fd, "AT\r") == -1)
 		warnx("AT: bad response");
-	if (send_at_command(serial_fd, "AT+IPR=115200&w\r") == -1)
-		errx(EXIT_FAILURE, "AT+IPR=115200&w: bad response");
-	sprintf(atcommand, "AT+CMUX=0,0,5,%d,10,3,30,10,2\r", MTU);
+	// if (send_at_command(serial_fd, "AT+IPR=115200&w\r") == -1)
+	// 	errx(EXIT_FAILURE, "AT+IPR=115200&w: bad response");
+	// sprintf(atcommand, "AT+CMUX=0,0,5,%d,10,3,30,10,2\r", MTU);
+	sprintf(atcommand, "AT+CMUX=0,0,0,%d,253,3,254,0,0\r", MTU);
 	if (send_at_command(serial_fd, atcommand) == -1)
 		errx(EXIT_FAILURE, "Cannot enable modem CMUX");
 
